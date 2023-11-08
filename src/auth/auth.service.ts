@@ -4,15 +4,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
-import { RegisterByEmailDto } from './dtos/register-by-email.dto';
+import { AuthRegisterDto } from './dtos/auth-register.dto';
 import { comparePass, generateHash } from 'src/utils/bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { verifyEmailDto } from './dtos/verify-email.dto';
+import { AuthVerifyEmailDto } from './dtos/auth-verify-email.dto';
 import { VerifyEmail } from 'src/constants/verify-email-code';
 import { UserStatus } from 'src/constants/user-status';
-import { LoginAuthDto } from './dtos/login-auth.dto';
-import { ResetPasswordDto } from './dtos/reset-password.dto';
+import { AuthEmailLoginDto } from './dtos/auth-email-login.dto';
+import { AuthResetPasswordDto } from './dtos/auth-reset-password.dto';
 import { TokenType } from 'src/constants/token.type';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async registerByEmail(body: RegisterByEmailDto) {
+  async registerByEmail(body: AuthRegisterDto) {
     const { email, password, confirmPassword } = body;
     const user = await this.userService.getUser({ email });
     if (user) {
@@ -42,9 +42,7 @@ export class AuthService {
       password: hashPassword,
     });
     const payload = {
-      sub: newUser.id,
-      email: newUser.email,
-      status: newUser.status,
+      id: newUser.id,
     };
     return await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('SECRET_KEY'),
@@ -52,7 +50,7 @@ export class AuthService {
     });
   }
 
-  async verifyEmail(data: verifyEmailDto) {
+  async verifyEmail(data: AuthVerifyEmailDto) {
     const user = await this.userService.getUser({ email: data.email });
     if (!user) {
       throw new BadRequestException('User do not exist');
@@ -64,7 +62,7 @@ export class AuthService {
     return await this.userService.updateUser(user.id, user);
   }
 
-  async login(data: LoginAuthDto) {
+  async login(data: AuthEmailLoginDto) {
     const user = await this.userService.getUser([
       { username: data.username },
       { email: data.username },
@@ -77,9 +75,7 @@ export class AuthService {
       throw new BadRequestException('Invalid password');
     }
     const payload = {
-      sub: user.id,
-      email: user.email,
-      status: user.status,
+      id: user.id,
     };
     return await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('SECRET_KEY'),
@@ -100,7 +96,7 @@ export class AuthService {
     return token;
   }
 
-  async resetPassword(resetPasswordToken: string, data: ResetPasswordDto) {
+  async resetPassword(resetPasswordToken: string, data: AuthResetPasswordDto) {
     if (!resetPasswordToken) {
       throw new BadRequestException();
     }

@@ -4,17 +4,16 @@ import {
   Controller,
   HttpStatus,
   Param,
-  Patch,
   Post,
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterByEmailDto } from './dtos/register-by-email.dto';
+import { AuthRegisterDto } from './dtos/auth-register.dto';
 import { Response } from 'express';
-import { verifyEmailDto } from './dtos/verify-email.dto';
-import { LoginAuthDto } from './dtos/login-auth.dto';
-import { ForgotPasswordDto } from './dtos/forgot-password.sto';
-import { ResetPasswordDto } from './dtos/reset-password.dto';
+import { AuthVerifyEmailDto } from './dtos/auth-verify-email.dto';
+import { AuthEmailLoginDto } from './dtos/auth-email-login.dto';
+import { AuthForgotPasswordDto } from './dtos/auth-forgot-password.sto';
+import { AuthResetPasswordDto } from './dtos/auth-reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,16 +21,16 @@ export class AuthController {
 
   @Post('/register')
   async registerByEmail(
-    @Body() registerByEmail: RegisterByEmailDto,
+    @Body() registerByEmail: AuthRegisterDto,
     @Res() res: Response,
   ): Promise<Response> {
-    const payload = await this.authService.registerByEmail(registerByEmail);
-    return res.status(HttpStatus.OK).send({ token: payload });
+    const token = await this.authService.registerByEmail(registerByEmail);
+    return res.status(HttpStatus.OK).send({ token });
   }
 
   @Post('/verify-email')
   async verifyEmail(
-    @Body() body: verifyEmailDto,
+    @Body() body: AuthVerifyEmailDto,
     @Res() res: Response,
   ): Promise<Response> {
     await this.authService.verifyEmail(body);
@@ -40,15 +39,18 @@ export class AuthController {
 
   @Post('/login')
   async login(
-    @Body() body: LoginAuthDto,
+    @Body() body: AuthEmailLoginDto,
     @Res() res: Response,
   ): Promise<Response> {
-    const payload = await this.authService.login(body);
-    return res.status(HttpStatus.OK).send({ token: payload });
+    const accessToken = await this.authService.login(body);
+    return res.status(HttpStatus.OK).send({ accessToken });
   }
 
   @Post('forgot-password')
-  async forgotPassword(@Body() body: ForgotPasswordDto, @Res() res: Response) {
+  async forgotPassword(
+    @Body() body: AuthForgotPasswordDto,
+    @Res() res: Response,
+  ) {
     const token = await this.authService.forgotPassword(body.email);
     return res.status(HttpStatus.OK).send({ message: 'SENT_EMAIL', token });
   }
@@ -56,7 +58,7 @@ export class AuthController {
   @Post('reset-password/:token')
   async resetPassword(
     @Param('token') token: string,
-    @Body() body: ResetPasswordDto,
+    @Body() body: AuthResetPasswordDto,
     @Res() res: Response,
   ) {
     const result = await this.authService.resetPassword(token, body);
