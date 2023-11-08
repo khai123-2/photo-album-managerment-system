@@ -37,7 +37,7 @@ export class AuthService {
     }
     delete body.confirmPassword;
     const hashPassword = await generateHash(body.password);
-    const newUser = await this.userService.createUsers({
+    const newUser = await this.userService.saveUser({
       ...body,
       password: hashPassword,
     });

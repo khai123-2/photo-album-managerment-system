@@ -26,11 +26,15 @@ export class UserService {
 
   async getUser(
     fields: FindOptionsWhere<User> | FindOptionsWhere<User>[],
+    relationOptions?: string[],
   ): Promise<User> {
-    return await this.userRepository.findOne({ where: fields });
+    return await this.userRepository.findOne({
+      where: fields,
+      relations: relationOptions,
+    });
   }
 
-  async createUsers(createUserDto: CreateUserDto) {
+  async saveUser(createUserDto: CreateUserDto) {
     return await this.userRepository.save(createUserDto);
   }
 

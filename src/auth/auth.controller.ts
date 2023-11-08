@@ -14,7 +14,9 @@ import { AuthVerifyEmailDto } from './dtos/auth-verify-email.dto';
 import { AuthEmailLoginDto } from './dtos/auth-email-login.dto';
 import { AuthForgotPasswordDto } from './dtos/auth-forgot-password.sto';
 import { AuthResetPasswordDto } from './dtos/auth-reset-password.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
