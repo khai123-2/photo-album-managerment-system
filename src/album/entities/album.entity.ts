@@ -1,13 +1,6 @@
-import {
-  Column,
-  DeleteDateColumn,
-  Entity,
-  JoinTable,
-  ManyToMany,
-} from 'typeorm';
-import { UserStatus } from '../../constants/user-status';
+import { Column, DeleteDateColumn, Entity } from 'typeorm';
 import { BaseEntity } from '../../utils/base.entity';
-import { AlbumStatus } from '../../constants/album-status';
+import { AlbumStatus, UserStatus } from '../../constants';
 
 @Entity()
 export class Album extends BaseEntity {

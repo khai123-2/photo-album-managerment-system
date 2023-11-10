@@ -1,5 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
-import { UserStatus } from '../../constants/user-status';
+import { UserStatus } from '../../constants';
 import { BaseEntity } from '../../utils/base.entity';
 import { Album } from '../../album/entities/album.entity';
 @Entity()

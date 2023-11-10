@@ -9,18 +9,17 @@ import { comparePass, generateHash } from 'src/utils/bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthVerifyEmailDto } from './dtos/auth-verify-email.dto';
-import { VerifyEmail } from 'src/constants/verify-email-code';
-import { UserStatus } from 'src/constants/user-status';
 import { AuthEmailLoginDto } from './dtos/auth-email-login.dto';
 import { AuthResetPasswordDto } from './dtos/auth-reset-password.dto';
-import { TokenType } from 'src/constants/token.type';
+import { TokenType, VerifyEmail, UserStatus } from 'src/constants';
+import { AllTypeConfig } from 'src/config/config.type';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<AllTypeConfig>,
   ) {}
 
   async registerByEmail(body: AuthRegisterDto) {
@@ -44,9 +43,11 @@ export class AuthService {
     const payload = {
       id: newUser.id,
     };
+    const authConfig = this.configService.getOrThrow('auth', { infer: true });
+
     return await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('SECRET_KEY'),
-      expiresIn: '1h',
+      secret: authConfig.secret,
+      expiresIn: authConfig.tokenExpires,
     });
   }
 
@@ -77,9 +78,12 @@ export class AuthService {
     const payload = {
       id: user.id,
     };
+
+    const authConfig = this.configService.getOrThrow('auth', { infer: true });
+
     return await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('SECRET_KEY'),
-      expiresIn: '1h',
+      secret: authConfig.secret,
+      expiresIn: authConfig.tokenExpires,
     });
   }
 
@@ -91,7 +95,9 @@ export class AuthService {
     const payload = { email: user.email };
     const token = await this.jwtService.signAsync(payload, {
       secret: TokenType.RESET_PASSWORD,
-      expiresIn: '5m',
+      expiresIn: this.configService.getOrThrow('auth', {
+        infer: true,
+      }).tokenEmailExpires,
     });
     return token;
   }

@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
-import { Album } from 'src/album/entities/album.entity';
-import { UserStatus } from 'src/constants/user-status';
+import { UserStatus } from 'src/constants';
 
 export class UpdateUserDto {
   @ApiProperty()

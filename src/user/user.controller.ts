@@ -4,36 +4,31 @@ import {
   Controller,
   Get,
   HttpStatus,
-  Param,
   Patch,
   Res,
-  UseGuards,
 } from '@nestjs/common';
 import { UpdateUserInfoDto } from './dtos/update-user-info.dto';
 import { UserService } from './user.service';
 import { Response } from 'express';
 import { ChangePasswordDto } from './dtos/change-password.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
+import { Auth, UUIDParam } from 'src/decorators';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @ApiBearerAuth()
   @Get()
-  @UseGuards(AuthGuard('jwt'))
+  @Auth()
   async getUsers(@Res() res: Response) {
     const data = await this.userService.getUsers();
     return res.status(HttpStatus.CREATED).send({ data });
   }
 
-  @ApiBearerAuth()
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @Auth()
   async updateUserInfo(
-    @Param('id') id: string,
+    @UUIDParam('id') id: string,
     @Body() body: UpdateUserInfoDto,
     @Res() res: Response,
   ) {
@@ -44,11 +39,10 @@ export class UserController {
     return res.status(HttpStatus.CREATED).send();
   }
 
-  @ApiBearerAuth()
   @Patch('change-password/:id')
-  @UseGuards(AuthGuard('jwt'))
+  @Auth()
   async changePassword(
-    @Param('id') id: string,
+    @UUIDParam('id') id: string,
     @Body() body: ChangePasswordDto,
     @Res() res: Response,
   ) {
