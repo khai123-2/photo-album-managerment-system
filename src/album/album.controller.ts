@@ -1,10 +1,19 @@
-import { Body, Controller, HttpStatus, Patch, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpStatus,
+  Patch,
+  Post,
+  Res,
+  UseFilters,
+} from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { Response } from 'express';
 import { CreateAlbumDto } from './dtos/create-album.dto-';
 import { User } from 'src/user/entities/user.entity';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Auth, UUIDParam } from 'src/decorators';
+import { HttpExceptionFilter } from 'src/exceptions';
 
 @ApiTags('Album')
 @Controller('album')

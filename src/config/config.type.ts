@@ -11,14 +11,14 @@ export type DatabaseConfig = {
 };
 
 export type AppConfig = {
-  nodeEnv?: string;
+  nodeEnv: string;
   port: number;
 };
 
 export type AuthConfig = {
   secret: string;
-  tokenEmailExpires?: string;
-  tokenExpires?: string;
+  tokenEmailExpires: string;
+  tokenExpires: string;
 };
 export type AllTypeConfig = {
   database: DatabaseConfig;
