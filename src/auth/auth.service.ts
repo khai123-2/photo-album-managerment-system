@@ -13,6 +13,7 @@ import { AuthEmailLoginDto } from './dtos/auth-email-login.dto';
 import { AuthResetPasswordDto } from './dtos/auth-reset-password.dto';
 import { TokenType, VerifyEmail, UserStatus } from 'src/constants';
 import { AllTypeConfig } from 'src/config/config.type';
+import { UserNotFoundException } from 'src/exceptions';
 
 @Injectable()
 export class AuthService {
@@ -69,7 +70,7 @@ export class AuthService {
       { email: data.username },
     ]);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UserNotFoundException();
     }
     const match = await comparePass(data.password, user.password);
     if (!match) {
@@ -90,7 +91,7 @@ export class AuthService {
   async forgotPassword(email: string) {
     const user = await this.userService.getUser({ email });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UserNotFoundException();
     }
     const payload = { email: user.email };
     const token = await this.jwtService.signAsync(payload, {
@@ -113,7 +114,7 @@ export class AuthService {
       email: payload.email,
     });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UserNotFoundException();
     }
     if (data.newPassword !== data.confirmPassword) {
       throw new NotFoundException(

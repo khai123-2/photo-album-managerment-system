@@ -4,6 +4,7 @@ import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AllTypeConfig } from './config/config.type';
+import { HttpExceptionFilter } from './exceptions';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,7 @@ async function bootstrap() {
       errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
     }),
   );
+  app.useGlobalFilters(new HttpExceptionFilter());
   const config = new DocumentBuilder()
     .setTitle('Album photo management system')
     .setDescription('Album photo management system')

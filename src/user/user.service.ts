@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { FindOptionsWhere, Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +7,7 @@ import { UpdateUserInfoDto } from './dtos/update-user-info.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { comparePass, generateHash } from 'src/utils/bcrypt';
+import { UserNotFoundException } from 'src/exceptions';
 
 @Injectable()
 export class UserService {
@@ -41,7 +38,7 @@ export class UserService {
   async updateUser(id: string, data: UpdateUserDto): Promise<UpdateResult> {
     const user = await this.getUser({ id });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UserNotFoundException();
     }
     return await this.userRepository.update(id, data);
   }
@@ -52,7 +49,7 @@ export class UserService {
   ): Promise<UpdateResult> {
     const user = await this.getUser({ id });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UserNotFoundException();
     }
     const username = await this.getUser({ username: data.username });
 
@@ -66,7 +63,7 @@ export class UserService {
   async changePassword(id: string, data: ChangePasswordDto) {
     const user = await this.getUser({ id });
     if (!user) {
-      throw new NotFoundException('User was not found');
+      throw new UserNotFoundException();
     }
     const match = await comparePass(data.oldPassword, user.password);
     if (!match) {
