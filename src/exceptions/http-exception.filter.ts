@@ -12,10 +12,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const httpStatus = 500;
+    let httpStatus = 500;
     let message = 'Internal Server';
     if (exception instanceof HttpException) {
-      message = exception.message;
+      message = exception.getResponse()['message'];
+      httpStatus = exception.getStatus();
     } else {
       console.log(exception);
     }

@@ -1,7 +1,7 @@
 import { Column, DeleteDateColumn, Entity, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../utils/base.entity';
 import { User } from '../../user/entities/user.entity';
-import { Photo } from 'src/photo/entities/photo.entity';
+import { Photo } from '../../photo/entities/photo.entity';
 
 @Entity()
 export class Comment extends BaseEntity {

@@ -15,6 +15,9 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
+  async getCurrentUser(user: User): Promise<User> {
+    return User.plainToClass(user);
+  }
   async getUsers(
     fields?: FindOptionsWhere<User> | FindOptionsWhere<User>[],
   ): Promise<User[] | []> {
@@ -82,5 +85,21 @@ export class UserService {
     const hashPassword = await generateHash(data.newPassword);
     user.password = hashPassword;
     return await this.userRepository.update(id, user);
+  }
+
+  async followUser(userId: string, followingId: string) {
+    if (userId === followingId) {
+      throw new BadRequestException();
+    }
+    const user = await this.getUser({ id: userId }, ['following']);
+    const following = await this.getUser({ id: followingId });
+    const userHasFollow = user.following.find(
+      (user) => user.id === followingId,
+    );
+    if (userHasFollow) {
+      throw new BadRequestException();
+    }
+    user.following.push(following);
+    return await this.saveUser(user);
   }
 }

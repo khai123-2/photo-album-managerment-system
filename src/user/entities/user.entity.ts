@@ -4,12 +4,14 @@ import { BaseEntity } from '../../utils/base.entity';
 import { Album } from '../../album/entities/album.entity';
 import { Photo } from '../../photo/entities/photo.entity';
 import { Comment } from '../../comment/entities/comment.entity';
+import { Exclude } from 'class-transformer';
 @Entity()
 export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
   @Column({ type: 'varchar', length: 255 })
+  @Exclude()
   password: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
@@ -18,7 +20,7 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
   username: string;
 
-  @OneToMany(() => Comment, (comment) => comment.user)
+  @OneToMany(() => Comment, (comment) => comment.user, { onDelete: 'CASCADE' })
   comments: Comment[];
 
   @ManyToMany(() => Album)
@@ -38,10 +40,6 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Photo, (photo) => photo.owner)
   photos: Photo[];
-
-  @ManyToMany(() => Photo, (photo) => photo.likes)
-  @JoinTable()
-  likedPhotos: Photo[];
 
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.INACTIVE })
   status: UserStatus;
