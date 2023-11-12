@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Patch,
+  Post,
   Res,
 } from '@nestjs/common';
 import { UpdateUserInfoDto } from './dtos/update-user-info.dto';
@@ -12,16 +13,17 @@ import { UserService } from './user.service';
 import { Response } from 'express';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { Auth, UUIDParam } from 'src/decorators';
+import { Auth, CurrentUser, UUIDParam } from 'src/decorators';
+import { User } from './entities/user.entity';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @Get()
+  @Get('/current-user')
   @Auth()
-  async getUsers(@Res() res: Response) {
-    const data = await this.userService.getUsers();
+  async getCurrentUser(@CurrentUser() user: User, @Res() res: Response) {
+    const data = await this.userService.getCurrentUser(user);
     return res.status(HttpStatus.CREATED).send({ data });
   }
 
@@ -48,6 +50,20 @@ export class UserController {
   ) {
     const result = await this.userService.changePassword(id, body);
     if (result.affected === 0) {
+      throw new BadRequestException();
+    }
+    return res.status(HttpStatus.CREATED).send();
+  }
+
+  @Post('follow/:followingId')
+  @Auth()
+  async follow(
+    @UUIDParam('followingId') followingId: string,
+    @CurrentUser() user: User,
+    @Res() res: Response,
+  ) {
+    const result = await this.userService.followUser(user.id, followingId);
+    if (!result) {
       throw new BadRequestException();
     }
     return res.status(HttpStatus.CREATED).send();

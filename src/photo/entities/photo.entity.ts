@@ -15,22 +15,22 @@ import { Comment } from '../../comment/entities/comment.entity';
 @Entity()
 export class Photo extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
-  description: string;
+  name: string;
 
   @Column({ type: 'varchar', length: 255 })
   link: string;
 
-  @ManyToOne(() => User, (user) => user.photos)
+  @ManyToOne(() => User, (user) => user.photos, { onDelete: 'CASCADE' })
   owner: User;
 
-  @ManyToOne(() => Album, (album) => album.photos)
+  @ManyToOne(() => Album, (album) => album.photos, { onDelete: 'CASCADE' })
   album: Album;
 
-  @ManyToMany(() => User, (user) => user.likedPhotos)
+  @ManyToMany(() => User, { onDelete: 'CASCADE' })
   @JoinTable()
   likes: User[];
 
-  @OneToMany(() => Comment, (comment) => comment.photo)
+  @OneToMany(() => Comment, (comment) => comment.photo, { onDelete: 'CASCADE' })
   comments: Comment[];
 
   @Column({ type: 'enum', enum: CommonStatus, default: CommonStatus.PUBLIC })

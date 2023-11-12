@@ -1,16 +1,22 @@
 import {
   BadRequestException,
-  HttpException,
   Inject,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  DataSource,
+  FindOptionsWhere,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { Album } from './entities/album.entity';
 import { CreateAlbumDto } from './dtos/create-album.dto-';
 import { UserService } from 'src/user/user.service';
+import { UpdateAlbumDto } from './dtos/update-album.dto';
 
 @Injectable()
 export class AlbumService {
@@ -51,17 +57,52 @@ export class AlbumService {
   }
 
   async joinAlbum(albumId: string, userId: string) {
-    const album = await this.getAlbum({ id: albumId });
-    if (!album) {
-      throw new NotFoundException('Album not found');
-    }
+    const album = await this.checkAlbumExists(albumId);
     const user = await this.userService.getUser({ id: userId }, ['albums']);
 
-    const userHasJoinAlbum = user.albums.find((album) => album.id === albumId);
+    const userHasJoinAlbum = await this.hasUserJoinedAlbum(userId, albumId);
     if (userHasJoinAlbum) {
       throw new BadRequestException();
     }
     user.albums.push(album);
     await this.userService.saveUser(user);
+  }
+
+  async checkAlbumExists(albumId: string): Promise<Album> {
+    const album = await this.getAlbum({ id: albumId });
+    if (!album) {
+      throw new NotFoundException('Album not found');
+    }
+    return album;
+  }
+
+  async hasUserJoinedAlbum(userId: string, albumId: string): Promise<boolean> {
+    const user = await this.userService.getUser({ id: userId }, ['albums']);
+    const userHasJoinedAlbum = user.albums.some(
+      (album) => album.id === albumId,
+    );
+    return userHasJoinedAlbum;
+  }
+  async updateAlbum(
+    albumId: string,
+    userId: string,
+    data: UpdateAlbumDto,
+  ): Promise<UpdateResult> {
+    const album = await this.checkAlbumExists(albumId);
+    const userHasJoinAlbum = await this.hasUserJoinedAlbum(userId, albumId);
+
+    if (!userHasJoinAlbum) {
+      throw new UnauthorizedException();
+    }
+    return await this.albumRepository.update(album.id, data);
+  }
+
+  async deleteAlbum(albumId: string, userId: string) {
+    const album = await this.checkAlbumExists(albumId);
+    const userHasJoinAlbum = await this.hasUserJoinedAlbum(userId, albumId);
+    if (!userHasJoinAlbum) {
+      throw new UnauthorizedException();
+    }
+    return await this.albumRepository.delete(album.id);
   }
 }
